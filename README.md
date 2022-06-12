@@ -15,7 +15,6 @@
 * [Variables](#pkg-variables)
 * [type Zulip](#Zulip)
   * [func (z *Zulip) Send(stream, topic, message string) (err error)](#Zulip.Send)
-  * [func (z *Zulip) SetRetries(count int, interval time.Duration)](#Zulip.SetRetries)
   * [func (z *Zulip) ToWriter(stream, topic string) io.Writer](#Zulip.ToWriter)
 
 
@@ -34,17 +33,18 @@ var (
 
 
 
-## <a name="Zulip">type</a> [Zulip](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=383:493#L22)
+## <a name="Zulip">type</a> [Zulip](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=373:585#L22)
 ``` go
 type Zulip struct {
     BaseURL  string
     Username string
     Token    string
-    // contains filtered or unexported fields
+    Retries  int           // Number of times to retry sending a message (disabled with 0)
+    Interval time.Duration // Interval between retries
 }
 
 ```
-Zulip is a goro-safe struct to enable repeatable transmissions to a Zulip instance
+Zulip is a struct to enable repeatable transmissions to a Zulip instance
 
 
 
@@ -55,25 +55,16 @@ Zulip is a goro-safe struct to enable repeatable transmissions to a Zulip instan
 
 
 
-### <a name="Zulip.Send">func</a> (\*Zulip) [Send](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=1026:1089#L44)
+### <a name="Zulip.Send">func</a> (\*Zulip) [Send](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=888:951#L38)
 ``` go
 func (z *Zulip) Send(stream, topic, message string) (err error)
 ```
-Send a message to Zulip, possibly retrying if SetRetries has been called.
+Send a message to Zulip, possibly retrying if Interval > 0
 
 
 
 
-### <a name="Zulip.SetRetries">func</a> (\*Zulip) [SetRetries](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=601:662#L31)
-``` go
-func (z *Zulip) SetRetries(count int, interval time.Duration)
-```
-SetRetries enables the automatic resending of messages that fail with an error. Set count=0 to disable
-
-
-
-
-### <a name="Zulip.ToWriter">func</a> (\*Zulip) [ToWriter](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=843:899#L38)
+### <a name="Zulip.ToWriter">func</a> (\*Zulip) [ToWriter](https://github.com/cognusion/go-zulipsend/tree/master/zulip.go?s=720:776#L32)
 ``` go
 func (z *Zulip) ToWriter(stream, topic string) io.Writer
 ```

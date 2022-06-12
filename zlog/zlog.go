@@ -6,16 +6,19 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 )
 
 var (
-	baseURL string
-	user    string
-	token   string
-	stream  string
-	topic   string
-	message string
-	debug   bool
+	baseURL       string
+	user          string
+	token         string
+	stream        string
+	topic         string
+	message       string
+	retryCount    int
+	retryInterval time.Duration
+	debug         bool
 )
 
 func main() {
@@ -26,6 +29,8 @@ func main() {
 	flag.StringVar(&topic, "topic", "", "Topic to post to")
 	flag.StringVar(&message, "message", "", "Message to send")
 	flag.BoolVar(&debug, "debug", false, "Enable debug output")
+	flag.IntVar(&retryCount, "retries", 0, "Number of retries on send fail (0 disables retries)")
+	flag.DurationVar(&retryInterval, "interval", 1*time.Second, "Interval to retry")
 
 	flag.Parse()
 
@@ -33,7 +38,13 @@ func main() {
 		zulip.DebugOut = log.New(os.Stderr, "[DEBUG]", log.Lshortfile)
 	}
 
-	z := zulip.Zulip{BaseURL: baseURL, Username: user, Token: token}
+	z := zulip.Zulip{
+		BaseURL:  baseURL,
+		Username: user,
+		Token:    token,
+		Retries:  retryCount,
+		Interval: retryInterval,
+	}
 	zw := z.ToWriter(stream, topic)
 
 	ZulipOut := log.New(zw, "", log.LUTC)

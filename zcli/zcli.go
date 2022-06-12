@@ -29,7 +29,7 @@ func main() {
 	flag.StringVar(&stream, "stream", "", "Stream to use")
 	flag.StringVar(&topic, "topic", "", "Topic to post to")
 	flag.StringVar(&message, "message", "", "Message to send")
-	flag.IntVar(&retryCount, "retries", 0, "Number of retries on send fail")
+	flag.IntVar(&retryCount, "retries", 0, "Number of retries on send fail (0 disables retries)")
 	flag.DurationVar(&retryInterval, "interval", 1*time.Second, "Interval to retry")
 	flag.BoolVar(&debug, "debug", false, "Enable debug output")
 
@@ -43,9 +43,8 @@ func main() {
 		BaseURL:  baseURL,
 		Username: user,
 		Token:    token,
-	}
-	if retryCount > 0 {
-		z.SetRetries(retryCount, retryInterval)
+		Retries:  retryCount,
+		Interval: retryInterval,
 	}
 
 	err := z.Send(stream, topic, message)

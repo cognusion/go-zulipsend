@@ -18,19 +18,13 @@ var (
 	DebugOut = log.New(ioutil.Discard, "[DEBUG]", log.Lshortfile)
 )
 
-// Zulip is a goro-safe struct to enable repeatable transmissions to a Zulip instance
+// Zulip is a struct to enable repeatable transmissions to a Zulip instance
 type Zulip struct {
 	BaseURL  string
 	Username string
 	Token    string
-	retries  int
-	interval time.Duration
-}
-
-// SetRetries enables the automatic resending of messages that fail with an error. Set count=0 to disable
-func (z *Zulip) SetRetries(count int, interval time.Duration) {
-	z.retries = count
-	z.interval = interval
+	Retries  int           // Number of times to retry sending a message (disabled with 0)
+	Interval time.Duration // Interval between retries
 }
 
 // ToWriter returns an io.Writer (zulip.Writer) suitable of being pumped into a log.New or anywhere
@@ -40,7 +34,7 @@ func (z *Zulip) ToWriter(stream, topic string) io.Writer {
 	return &zw
 }
 
-// Send a message to Zulip, possibly retrying if SetRetries has been called.
+// Send a message to Zulip, possibly retrying if Interval > 0
 func (z *Zulip) Send(stream, topic, message string) (err error) {
 
 	pBody := []string{
@@ -96,7 +90,7 @@ func (z *Zulip) Send(stream, topic, message string) (err error) {
 		return rerr
 	}
 
-	r := retrier.New(retrier.ConstantBackoff(z.retries, z.interval), nil)
+	r := retrier.New(retrier.ConstantBackoff(z.Retries, z.Interval), nil)
 
 	err = r.Run(send)
 
