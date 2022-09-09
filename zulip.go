@@ -5,7 +5,6 @@ import (
 
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -15,7 +14,7 @@ import (
 
 var (
 	// DebugOut is a log.Logger that gets debug output. Hook it up to get output
-	DebugOut = log.New(ioutil.Discard, "[DEBUG]", log.Lshortfile)
+	DebugOut = log.New(io.Discard, "[DEBUG]", log.Lshortfile)
 )
 
 // Zulip is a struct to enable repeatable transmissions to a Zulip instance
@@ -68,7 +67,7 @@ func (z *Zulip) Send(stream, topic, message string) (err error) {
 		)
 		resp, err = http.DefaultClient.Do(req)
 		DebugOut.Printf("Zulip Response: %+v\n", resp)
-		b, rerr := ioutil.ReadAll(resp.Body)
+		b, rerr := io.ReadAll(resp.Body)
 		DebugOut.Printf("Zulip Response Body: %s\n", string(b))
 		resp.Body.Close()
 
